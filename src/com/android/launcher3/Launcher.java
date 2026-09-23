@@ -2163,6 +2163,10 @@ public class Launcher extends StatefulActivity<LauncherState>
             BubbleTextView btv = (BubbleTextView) v;
             btv.setStayPressed(true);
             result.add(btv::clearPressedIconState);
+            // LC: Without Quickstep, the launch animation never reports finishing, so the icon
+            // would stay at its pressed scale until the close animation ends. Reset it once the
+            // app covers the launcher instead.
+            addEventCallback(EVENT_STOPPED, btv::clearPressedIconState);
         }
         return result;
     }

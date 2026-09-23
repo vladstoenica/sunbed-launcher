@@ -112,14 +112,6 @@ fun PreferencesDashboard(
                 isSelected = currentRoute is General,
             )
 
-            PreferenceCategory(
-                label = stringResource(R.string.home_screen_label),
-                description = stringResource(R.string.home_screen_description),
-                iconResource = R.drawable.ic_home_screen,
-                onNavigate = { onNavigate(HomeScreen) },
-                isSelected = currentRoute is HomeScreen,
-            )
-
             val isSmartspaceEnabled = prefs2.enableSmartspace.firstCached()
             PreferenceCategory(
                 label = stringResource(id = R.string.smartspace_widget),
@@ -130,11 +122,11 @@ fun PreferencesDashboard(
             )
 
             PreferenceCategory(
-                label = stringResource(R.string.dock_label),
-                description = stringResource(R.string.dock_description),
-                iconResource = R.drawable.ic_dock,
-                onNavigate = { onNavigate(Dock) },
-                isSelected = currentRoute is Dock,
+                label = stringResource(R.string.home_screen_label),
+                description = stringResource(R.string.home_screen_description),
+                iconResource = R.drawable.ic_home_screen,
+                onNavigate = { onNavigate(HomeScreen) },
+                isSelected = currentRoute is HomeScreen,
             )
 
             ExpandAndShrink(
@@ -150,11 +142,11 @@ fun PreferencesDashboard(
             }
 
             PreferenceCategory(
-                label = stringResource(R.string.search_bar_label),
-                description = stringResource(R.string.drawer_search_description),
-                iconResource = R.drawable.ic_search,
-                onNavigate = { onNavigate(Search()) },
-                isSelected = currentRoute is Search,
+                label = stringResource(R.string.dock_label),
+                description = stringResource(R.string.dock_description),
+                iconResource = R.drawable.ic_dock,
+                onNavigate = { onNavigate(Dock) },
+                isSelected = currentRoute is Dock,
             )
 
             PreferenceCategory(
@@ -163,6 +155,14 @@ fun PreferencesDashboard(
                 iconResource = R.drawable.ic_folder,
                 onNavigate = { onNavigate(Folders) },
                 isSelected = currentRoute is Folders,
+            )
+
+            PreferenceCategory(
+                label = stringResource(R.string.search_bar_label),
+                description = stringResource(R.string.drawer_search_description),
+                iconResource = R.drawable.ic_search,
+                onNavigate = { onNavigate(Search()) },
+                isSelected = currentRoute is Search,
             )
 
             PreferenceCategory(

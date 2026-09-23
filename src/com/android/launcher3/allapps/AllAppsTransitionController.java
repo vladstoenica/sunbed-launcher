@@ -60,7 +60,6 @@ import com.android.launcher3.util.MSDLPlayerWrapper;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.launcher3.util.MultiValueAlpha;
-import com.android.launcher3.util.ScrollableLayoutManager;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ScrimView;
 
@@ -286,15 +285,7 @@ public class AllAppsTransitionController
     @Override
     public void onBackProgressed(
             LauncherState toState, @FloatRange(from = 0.0, to = 1.0) float backProgress) {
-        if (!mLauncher.isInState(ALL_APPS) || !NORMAL.equals(toState)) {
-            return;
-        }
-
-        float scaleProgress = ScrollableLayoutManager.PREDICTIVE_BACK_MIN_SCALE
-                + (1 - ScrollableLayoutManager.PREDICTIVE_BACK_MIN_SCALE)
-                * (1 - backProgress);
-
-        mAllAppScale.updateValue(scaleProgress);
+        // LC: Don't shrink the drawer during the predictive back gesture.
     }
 
     private void onScaleProgressChanged() {

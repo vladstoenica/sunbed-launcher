@@ -227,7 +227,7 @@ android {
 
         debug {
             applicationIdSuffix ".debug"
-            resValue("string", "derived_app_name", "Lawnchair (Debug)")
+            resValue("string", "derived_app_name", "Sunbed (Debug)")
 
             manifestPlaceholders.quickstepMinSdk = "0"
             manifestPlaceholders.quickstepMaxSdk = "100000"
@@ -236,7 +236,7 @@ android {
         }
 
         release {
-            resValue("string", "derived_app_name", "Lawnchair")
+            resValue("string", "derived_app_name", "Sunbed")
             minifyEnabled true
             shrinkResources true
             pseudoLocalesEnabled false
@@ -495,9 +495,6 @@ dependencies {
     implementation libs.google.guava
 
     implementation libs.androidx.exifinterface
-
-    debugImplementation libs.leakcanary.android
-    debugImplementation libs.leakcanary.androidstudio
 }
 
 ksp {

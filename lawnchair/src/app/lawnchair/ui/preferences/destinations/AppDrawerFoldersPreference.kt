@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -89,8 +90,8 @@ fun AppDrawerFoldersPreference(
     AppDrawerFoldersPreference(
         modifier = modifier,
         folders = folders,
-        onCreateFolder = { label ->
-            viewModel.createFolder(label)
+        onCreateFolder = { label, onCreated ->
+            viewModel.createFolder(label, onCreated)
         },
         onEditFolderItems = {
             navController.navigate(AppDrawerAppListToFolder(it))
@@ -110,7 +111,7 @@ fun AppDrawerFoldersPreference(
 @Composable
 fun AppDrawerFoldersPreference(
     folders: List<FolderEntry>?,
-    onCreateFolder: (String) -> Unit,
+    onCreateFolder: (String, (Int) -> Unit) -> Unit,
     onEditFolderItems: (Int) -> Unit,
     onRenameFolder: (Int, String) -> Unit,
     onDeleteFolder: (FolderEntry) -> Unit,
@@ -158,7 +159,12 @@ fun AppDrawerFoldersPreference(
                                 folderId = 0,
                                 initialTitle = stringResource(R.string.my_folder_label),
                                 itemCount = 0,
-                                onRename = { _, title -> onCreateFolder(title) },
+                                onRename = { _, title ->
+                                    onCreateFolder(title) { newId ->
+                                        onEditFolderItems(newId)
+                                        bottomSheetHandler.hide()
+                                    }
+                                },
                                 onNavigate = {},
                                 onDismiss = {
                                     bottomSheetHandler.hide()
@@ -182,12 +188,19 @@ fun AppDrawerFoldersPreference(
                     folderEntry = folderEntry,
                     onItemClick = {
                         mMSDLPlayerWrapper.playToken(MSDLToken.TAP_MEDIUM_EMPHASIS)
+                        onEditFolderItems(folderEntry.id)
+                    },
+                    onItemEdit = {
+                        mMSDLPlayerWrapper.playToken(MSDLToken.TAP_MEDIUM_EMPHASIS)
                         bottomSheetHandler.show {
                             FolderEditSheet(
                                 folderId = folderEntry.id,
                                 initialTitle = folderEntry.title,
                                 itemCount = folderEntry.itemComponentKeys.size,
-                                onRename = onRenameFolder,
+                                onRename = { id, title ->
+                                    onRenameFolder(id, title)
+                                    bottomSheetHandler.hide()
+                                },
                                 onNavigate = {
                                     onEditFolderItems(it)
                                     bottomSheetHandler.hide()
@@ -241,7 +254,6 @@ fun FolderEditSheet(
             Button(
                 onClick = {
                     onRename(folderId, textFieldValue.text)
-                    onDismiss()
                 },
                 shapes = ButtonDefaults.shapes(),
             ) {
@@ -265,7 +277,7 @@ fun FolderEditSheet(
             )
             if (!hideAppPicker) {
                 ClickablePreference(
-                    label = "Manage apps",
+                    label = stringResource(R.string.manage_folder_apps),
                     subtitle = resources.getQuantityString(
                         R.plurals.apps_count,
                         itemCount,
@@ -286,6 +298,7 @@ fun FolderEditSheet(
 fun FolderItem(
     folderEntry: FolderEntry,
     onItemClick: (FolderEntry) -> Unit,
+    onItemEdit: (FolderEntry) -> Unit,
     onItemDelete: (FolderEntry) -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -315,13 +328,25 @@ fun FolderItem(
             Row {
                 IconButton(
                     onClick = {
+                        onItemEdit(folderEntry)
+                    },
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
+                    Icon(
+                        Icons.Rounded.Edit,
+                        contentDescription = stringResource(R.string.edit_folder),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(
+                    onClick = {
                         onItemDelete(folderEntry)
                     },
                     shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(
                         Icons.Rounded.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.action_delete),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }

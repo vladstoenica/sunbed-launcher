@@ -65,17 +65,18 @@ class FolderViewModel(
         }
     }
 
-    fun createFolder(title: String) {
+    fun createFolder(title: String, onCreated: (Int) -> Unit = {}) {
         viewModelScope.launch {
-            repository.saveFolderInfo(title)
+            val id = repository.saveFolderInfo(title)
+            onCreated(id.toInt())
         }
     }
 
     fun deleteFolder(id: Int) {
         viewModelScope.launch {
             repository.deleteFolderInfo(id)
+            reloadHelper.reloadGrid()
         }
-        reloadHelper.reloadGrid()
     }
 
     fun updateFolderOrder(orderedIds: List<Int>) {

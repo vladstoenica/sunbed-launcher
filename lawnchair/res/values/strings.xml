@@ -126,6 +126,7 @@
     <string name="caddy">Caddy</string>
 
     <string name="app_drawer_folder">App drawer folders</string>
+    <string name="manage_folder_apps">Manage apps</string>
     <string name="selected_apps">Selected apps</string>
     <string name="add_apps">Add apps</string>
     <string name="app_drawer_folder_settings">App drawer folder</string>

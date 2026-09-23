@@ -66,6 +66,10 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
     // Depth to apply behind All Apps when it's presented on a sheet.
     private static final Interpolator ALL_APPS_SHEET_DEPTH = DECELERATED_EASE;
 
+    // LC: On phones, the home screen fades out by the time the sheet is halfway up.
+    private static final Interpolator ALL_APPS_SHEET_WORKSPACE_FADE =
+            Interpolators.clampToProgress(LINEAR, 0f, ALL_APPS_STAGGERED_FADE_THRESHOLD);
+
     // ---- Custom interpolators for NORMAL -> ALL_APPS on phones only. ----
 
     public static final float ALL_APPS_STATE_TRANSITION_ATOMIC = 0.3333f;
@@ -218,6 +222,11 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
                 config.setInterpolator(ANIM_WORKSPACE_FADE, INSTANT);
                 config.setInterpolator(ANIM_HOTSEAT_FADE, INSTANT);
                 config.animFlags |= StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
+            } else if (launcher.getDeviceProfile().getDeviceProperties().isPhone()) {
+                config.setInterpolator(ANIM_WORKSPACE_FADE,
+                        Interpolators.reverse(ALL_APPS_SHEET_WORKSPACE_FADE));
+                config.setInterpolator(ANIM_HOTSEAT_FADE,
+                        Interpolators.reverse(ALL_APPS_SHEET_WORKSPACE_FADE));
             }
         } else {
             if (config.isUserControlled()) {
@@ -266,6 +275,9 @@ public class AllAppsSwipeController extends AbstractStateChangeTouchController {
                 config.setInterpolator(ANIM_WORKSPACE_FADE, FINAL_FRAME);
                 config.setInterpolator(ANIM_HOTSEAT_FADE, FINAL_FRAME);
                 config.animFlags |= StateAnimationConfig.SKIP_DEPTH_CONTROLLER;
+            } else if (launcher.getDeviceProfile().getDeviceProperties().isPhone()) {
+                config.setInterpolator(ANIM_WORKSPACE_FADE, ALL_APPS_SHEET_WORKSPACE_FADE);
+                config.setInterpolator(ANIM_HOTSEAT_FADE, ALL_APPS_SHEET_WORKSPACE_FADE);
             }
         } else {
             config.setInterpolator(ANIM_DEPTH,

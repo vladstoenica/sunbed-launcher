@@ -179,8 +179,10 @@ public class AllAppsState extends LauncherState {
         return elements;
     }
 
+    // LC: On phones, fade the home screen out behind the drawer instead of keeping it visible.
+    // Samsung's backdrop blur sits above the workspace and would smear it away abruptly.
     private static boolean isWorkspaceVisible(DeviceProfile deviceProfile) {
-        return deviceProfile.getDeviceProperties().isTablet() || (Flags.allAppsSheetForHandheld() && Flags.allAppsBlur());
+        return deviceProfile.getDeviceProperties().isTablet();
     }
 
     @Override

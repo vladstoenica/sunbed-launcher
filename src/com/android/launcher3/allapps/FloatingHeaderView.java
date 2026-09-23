@@ -482,8 +482,11 @@ public class FloatingHeaderView extends LinearLayout implements
     @Override
     public void setInsets(Rect insets) {
         var dp =  ActivityContext.lookupContext(getContext()).getDeviceProfile();
-        int leftRightPadding = dp.allAppsPadding.left + dp.allAppsPadding.right;
-        setPadding(leftRightPadding, getPaddingTop(), leftRightPadding, getPaddingBottom());
+        // Lawnchair: use the same per-side padding as the app list (see
+        // ActivityAllAppsContainerView#applyAdapterSideAndBottomPaddings) so the header rows,
+        // such as suggested apps, stay aligned with the grid and shrink at the same rate.
+        setPadding(dp.allAppsPadding.left, getPaddingTop(), dp.allAppsPadding.right,
+                getPaddingBottom());
     }
 
     public <T extends FloatingHeaderRow> T findFixedRowByType(Class<T> type) {

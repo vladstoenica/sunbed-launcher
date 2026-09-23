@@ -234,6 +234,20 @@ class PreferenceManager2 @Inject constructor(
         defaultValue = ColorOption.fromString(context.getString(R.string.config_default_app_drawer_bg_color)),
     )
 
+    val appDrawerTextColor = preference(
+        key = stringPreferencesKey(name = "app_drawer_text_color"),
+        defaultValue = ColorMode.AUTO,
+        parse = { ColorMode.fromString(it) ?: ColorMode.AUTO },
+        save = { it.toString() },
+        onSet = { reloadHelper.recreate() },
+    )
+
+    val hotseatQsbAccentStrength = preference(
+        key = floatPreferencesKey(name = "hotseat_qsb_accent_strength"),
+        defaultValue = 1f,
+        onSet = { reloadHelper.recreate() },
+    )
+
     val appDrawerSearchBarBackground = preference(
         key = booleanPreferencesKey(name = "all_apps_search_bar_background"),
         defaultValue = context.resources.getBoolean(R.bool.config_default_search_bar_background),
@@ -528,6 +542,13 @@ class PreferenceManager2 @Inject constructor(
         onSet = { reloadHelper.reloadGrid() },
     )
 
+    /** Shadow style of home screen and dock icons and labels: false is Default, true is Shady. */
+    val homeShadyShadows = preference(
+        key = booleanPreferencesKey(name = "home_shady_shadows"),
+        defaultValue = false,
+        onSet = { reloadHelper.recreate() },
+    )
+
     val homeIconLabelFolderSizeFactor = preference(
         key = floatPreferencesKey(name = "home_icon_label_folder_size_factor"),
         defaultValue = resourceProvider.getFloat(R.dimen.config_default_home_icon_label_folder_size_factor),
@@ -570,9 +591,21 @@ class PreferenceManager2 @Inject constructor(
         onSet = { reloadHelper.reloadGrid() },
     )
 
-    val workspacePaddingVerticalFactor = preference(
-        key = floatPreferencesKey(name = "workspace_padding_vertical"),
-        defaultValue = resourceProvider.getFloat(R.dimen.config_default_workspace_padding_vertical),
+    // The top and bottom factors replace the old single vertical one. Default to whatever the user
+    // had set for it so their existing home screen layout doesn't change on update.
+    private val legacyWorkspacePaddingVertical =
+        cachedPreferences[floatPreferencesKey(name = "workspace_padding_vertical")]
+            ?: resourceProvider.getFloat(R.dimen.config_default_workspace_padding_vertical)
+
+    val workspacePaddingTopFactor = preference(
+        key = floatPreferencesKey(name = "workspace_padding_top"),
+        defaultValue = legacyWorkspacePaddingVertical,
+        onSet = { reloadHelper.reloadGrid() },
+    )
+
+    val workspacePaddingBottomFactor = preference(
+        key = floatPreferencesKey(name = "workspace_padding_bottom"),
+        defaultValue = legacyWorkspacePaddingVertical,
         onSet = { reloadHelper.reloadGrid() },
     )
 
@@ -588,6 +621,12 @@ class PreferenceManager2 @Inject constructor(
         onSet = { reloadHelper.reloadGrid() },
     )
 
+    val drawerPaddingBottomFactor = preference(
+        key = floatPreferencesKey(name = "drawer_padding_bottom"),
+        defaultValue = resourceProvider.getFloat(R.dimen.config_default_drawer_padding_bottom),
+        onSet = { reloadHelper.reloadGrid() },
+    )
+
     val enableFuzzySearch = preference(
         key = booleanPreferencesKey(name = "enable_fuzzy_search"),
         defaultValue = context.resources.getBoolean(R.bool.config_default_enable_fuzzy_search),
@@ -599,6 +638,12 @@ class PreferenceManager2 @Inject constructor(
         parse = { FullScreenOverlayMode.fromValue(it) },
         save = { it.value },
         onSet = { reloadHelper.reloadGrid() },
+    )
+
+    val drawerSearchProviderLogo = preference(
+        key = booleanPreferencesKey(name = "drawer_search_provider_logo"),
+        defaultValue = true,
+        onSet = { reloadHelper.recreate() },
     )
 
     val matchHotseatQsbStyle = preference(

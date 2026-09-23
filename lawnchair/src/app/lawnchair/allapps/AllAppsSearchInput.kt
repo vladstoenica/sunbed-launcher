@@ -162,6 +162,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
                 }
                 val themedQsb by prefs2.themedHotseatQsb.asState()
                 val shouldShowIcons by prefs2.matchHotseatQsbStyle.asState()
+                val showProviderLogo by prefs2.drawerSearchProviderLogo.asState()
 
                 val supportsLens = searchProvider == Google || searchProvider == PixelSearch
                 val voiceIntent = remember(searchProvider, context) {
@@ -175,6 +176,7 @@ class AllAppsSearchInput(context: Context, attrs: AttributeSet?) :
                     searchProvider = searchProvider,
                     themed = themedQsb,
                     shouldShowIcons = shouldShowIcons,
+                    showProviderLogo = showProviderLogo,
                     queryEmpty = queryEmpty,
                     showMic = voiceIntent != null,
                     showLens = lensIntent != null,

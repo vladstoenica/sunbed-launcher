@@ -67,6 +67,7 @@ fun DockSearchPreference(
     val themeQsbAdapter = prefs2.themedHotseatQsb.getAdapter()
     val qsbCornerAdapter = prefs.hotseatQsbCornerRadius.getAdapter()
     val qsbAlphaAdapter = prefs.hotseatQsbAlpha.getAdapter()
+    val qsbAccentStrengthAdapter = prefs2.hotseatQsbAccentStrength.getAdapter()
     val qsbHotseatStrokeWidth = prefs.hotseatQsbStrokeWidth.getAdapter()
     val strokeColorStyleAdapter = prefs2.strokeColorStyle.getAdapter()
     val hotseatQsbProviderAdapter by prefs2.hotseatQsbProvider.getAdapter()
@@ -87,6 +88,7 @@ fun DockSearchPreference(
                             themed = themeQsbAdapter.state.value,
                             cornerRadiusFactor = qsbCornerAdapter.state.value,
                             transparency = qsbAlphaAdapter.state.value,
+                            accentStrength = qsbAccentStrengthAdapter.state.value,
                             strokeWidth = qsbHotseatStrokeWidth.state.value,
                             strokeColor = strokeColorStyleAdapter.state.value,
                         )
@@ -114,6 +116,15 @@ fun DockSearchPreference(
                                 adapter = themeQsbAdapter,
                                 label = stringResource(id = R.string.apply_accent_color_label),
                             )
+                            ExpandAndShrink(visible = themeQsbAdapter.state.value) {
+                                SliderPreference(
+                                    label = stringResource(id = R.string.accent_color_strength_label),
+                                    adapter = qsbAccentStrengthAdapter,
+                                    step = 0.05F,
+                                    valueRange = 0F..1F,
+                                    showAsPercentage = true,
+                                )
+                            }
                             SliderPreference(
                                 label = stringResource(id = R.string.corner_radius_label),
                                 adapter = qsbCornerAdapter,
@@ -173,6 +184,7 @@ private fun DockSearchBarPreview(
     themed: Boolean,
     cornerRadiusFactor: Float,
     transparency: Int,
+    accentStrength: Float,
     strokeWidth: Float,
     strokeColor: ColorOption,
     modifier: Modifier = Modifier,
@@ -213,6 +225,7 @@ private fun DockSearchBarPreview(
                         context,
                         themed,
                         getThemedQsbBackgroundColor(),
+                        accentStrength,
                     ),
                     cornerRadius = cornerRadiusFactor,
                     backgroundAlpha = transparency,

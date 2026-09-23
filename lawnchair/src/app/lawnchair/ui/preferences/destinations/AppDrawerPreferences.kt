@@ -39,10 +39,12 @@ import app.lawnchair.preferences.PreferenceAdapter
 import app.lawnchair.preferences.getAdapter
 import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.preferenceManager2
+import app.lawnchair.theme.color.ColorMode
 import app.lawnchair.ui.preferences.LocalIsExpandedScreen
 import app.lawnchair.ui.preferences.components.AppDrawerHapticFeedbackPreference
 import app.lawnchair.ui.preferences.components.NavigationActionPreference
 import app.lawnchair.ui.preferences.components.colorpreference.ColorPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreference
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreferenceWithPreview
@@ -103,6 +105,16 @@ fun AppDrawerPreferences(
                 step = 0.1f,
                 valueRange = 0F..1F,
                 showAsPercentage = true,
+            )
+            SwitchPreference(
+                adapter = prefs.drawerBlur.getAdapter(),
+                label = stringResource(id = R.string.app_drawer_background_blur_label),
+                description = stringResource(id = R.string.app_drawer_background_blur_description),
+            )
+            ListPreference(
+                adapter = prefs2.appDrawerTextColor.getAdapter(),
+                entries = ColorMode.entries(),
+                label = stringResource(id = R.string.app_drawer_text_color),
             )
             ColorPreference(preference = prefs2.workProfileTabBackgroundColor)
             SwitchPreference(
@@ -166,13 +178,20 @@ fun AppDrawerPreferences(
                 step = 0.05F,
                 showAsPercentage = true,
             )
+            SliderPreference(
+                adapter = prefs2.drawerPaddingBottomFactor.getAdapter(),
+                label = stringResource(id = R.string.bottom_padding_label),
+                valueRange = 1.0F..2.0F,
+                step = 0.05F,
+                showAsPercentage = true,
+            )
         }
         val showDrawerLabels = prefs2.showIconLabelsInDrawer.getAdapter()
         PreferenceGroup(heading = stringResource(id = R.string.icons)) {
             SliderPreference(
                 label = stringResource(id = R.string.icon_sizes),
                 adapter = prefs2.drawerIconSizeFactor.getAdapter(),
-                step = 0.1f,
+                step = 0.01f,
                 valueRange = 0.5F..1.5F,
                 showAsPercentage = true,
             )
@@ -186,7 +205,7 @@ fun AppDrawerPreferences(
                 SliderPreference(
                     label = stringResource(id = R.string.label_size),
                     adapter = prefs2.drawerIconLabelSizeFactor.getAdapter(),
-                    step = 0.1F,
+                    step = 0.01f,
                     valueRange = 0.5F..1.5F,
                     showAsPercentage = true,
                 )

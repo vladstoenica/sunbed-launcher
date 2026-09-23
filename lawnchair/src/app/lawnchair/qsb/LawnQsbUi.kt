@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import app.lawnchair.qsb.providers.Google
 import app.lawnchair.qsb.providers.GoogleGo
 import app.lawnchair.qsb.providers.PixelSearch
@@ -232,6 +233,8 @@ fun rememberHotseatQsbState(
  * @param searchProvider The search engine provider currently selected.
  * @param themed Whether the icons should use themed (monochrome) variants if available.
  * @param shouldShowIcons Whether the icons should be visible.
+ * @param showProviderLogo Whether the start icon shows the search provider's logo instead of a
+ * magnifying glass. Always true when [shouldShowIcons] is true.
  * @param queryEmpty Whether the search query is empty.
  * @param showMic Whether the voice search (microphone) icon should be visible.
  * @param showLens Whether the Google Lens icon should be visible.
@@ -242,6 +245,7 @@ fun rememberAllAppsQsbState(
     searchProvider: QsbSearchProvider,
     themed: Boolean,
     shouldShowIcons: Boolean,
+    showProviderLogo: Boolean,
     queryEmpty: Boolean,
     showMic: Boolean,
     showLens: Boolean,
@@ -251,9 +255,10 @@ fun rememberAllAppsQsbState(
     val lensLabel = stringResource(R.string.label_lens)
     val clearLabel = stringResource(R.string.search_input_action_clear_results)
 
-    return remember(searchProvider, themed, shouldShowIcons, queryEmpty, showMic, showLens, searchLabel, voiceSearchLabel, lensLabel, clearLabel) {
-        val iconRes = if (themed && shouldShowIcons) searchProvider.themedIcon else searchProvider.icon
-        val resId = if (shouldShowIcons) iconRes else R.drawable.ic_qsb_search
+    return remember(searchProvider, themed, shouldShowIcons, showProviderLogo, queryEmpty, showMic, showLens, searchLabel, voiceSearchLabel, lensLabel, clearLabel) {
+        val showLogo = shouldShowIcons || showProviderLogo
+        val iconRes = if (themed && showLogo) searchProvider.themedIcon else searchProvider.icon
+        val resId = if (showLogo) iconRes else R.drawable.ic_qsb_search
         val isGoogleProvider = searchProvider == Google || searchProvider == GoogleGo || searchProvider == PixelSearch
 
         QsbState(
@@ -262,7 +267,7 @@ fun rememberAllAppsQsbState(
                 id = QsbIconId.SEARCH,
                 resId = resId,
                 themed = themed || resId == R.drawable.ic_qsb_search,
-                method = if (shouldShowIcons) searchProvider.themingMethod else ThemingMethod.TINT,
+                method = if (showLogo) searchProvider.themingMethod else ThemingMethod.TINT,
                 contentDescription = searchLabel,
             ),
             endIcons = listOf(
@@ -308,12 +313,22 @@ fun getHotseatQsbCornerRadius(context: Context, cornerRadiusFactor: Float): Floa
 
 /**
  * Calculates the default background color for the Hotseat Quick Search Bar (QSB).
+ *
+ * @param themedStrength How much of the themed (accent) background to apply when [themed] is true,
+ * from 0f (the neutral fill) to 1f (the full themed background).
  */
-fun getHotseatBackgroundColor(context: Context, themed: Boolean, themedBackgroundColor: Int? = null): Int {
+fun getHotseatBackgroundColor(
+    context: Context,
+    themed: Boolean,
+    themedBackgroundColor: Int? = null,
+    themedStrength: Float = 1f,
+): Int {
+    val neutralColor = Themes.getAttrColor(context, R.attr.qsbFillColor)
     return if (themed) {
-        themedBackgroundColor ?: Themes.getColorBackgroundFloating(context)
+        val themedColor = themedBackgroundColor ?: Themes.getColorBackgroundFloating(context)
+        ColorUtils.blendARGB(neutralColor, themedColor, themedStrength.coerceIn(0f, 1f))
     } else {
-        Themes.getAttrColor(context, R.attr.qsbFillColor)
+        neutralColor
     }
 }
 

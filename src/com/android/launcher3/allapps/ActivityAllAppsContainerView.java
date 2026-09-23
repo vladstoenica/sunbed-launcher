@@ -116,6 +116,7 @@ import java.util.stream.Stream;
 import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
 import static com.topjohnwu.superuser.internal.Utils.context;
 import app.lawnchair.allapps.LawnchairAlphabeticalAppsList;
+import app.lawnchair.blur.DrawerBlur;
 import app.lawnchair.font.FontManager;
 import app.lawnchair.preferences.PreferenceManager;
 import app.lawnchair.preferences2.PreferenceManager2;
@@ -384,7 +385,8 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         mActivityContext.addOnDeviceProfileChangeListener(this);
         if (Utilities.ATLEAST_S) {
             java.util.function.Consumer<Boolean> listener = enabled -> {
-                if (updateBottomSheetBackgroundColor(enabled)) {
+                if (updateBottomSheetBackgroundColor(
+                        DrawerBlur.isBlurEnabled(getContext(), enabled))) {
                     invalidate();
                 }
             };
@@ -982,6 +984,9 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             defaultColor = mBottomSheetBackgroundColorOverBlur;
         }
         int newColor = LawnchairUtilsKt.getAllAppsBackgroundColor(mActivityContext, defaultColor);
+        if (Flags.allAppsBlur() && blurEnabled) {
+            newColor = DrawerBlur.boostOpacityOverBlur(newColor);
+        }
         if (mCachedBottomSheetBgColor != newColor) {
             mCachedBottomSheetBgColor = newColor;
             return true;
@@ -1447,7 +1452,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     }
 
     private void applyAdapterSideAndBottomPaddings(DeviceProfile grid) {
-        int bottomPadding = Math.max(mInsets.bottom, mNavBarScrimHeight);
+        int bottomPadding = Math.max(mInsets.bottom, mNavBarScrimHeight) + grid.allAppsPadding.bottom;
         mAH.forEach(adapterHolder -> {
             adapterHolder.mPadding.bottom = bottomPadding;
             adapterHolder.mPadding.left = grid.allAppsPadding.left;

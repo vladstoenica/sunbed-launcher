@@ -626,6 +626,12 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @UiThread
     public void applyLabel(ItemInfo info) {
+        // Lawnchair: re-apply the explicit drawer text color on every bind, so it doesn't depend
+        // on when the view was constructed or on anything recoloring it afterwards.
+        if (mDisplay == DISPLAY_ALL_APPS || mDisplay == DISPLAY_PREDICTION_ROW
+                || mDisplay == DISPLAY_SEARCH_RESULT_APP_ROW || mDisplay == DISPLAY_DRAWER_FOLDER) {
+            LawnchairUtilsKt.applyAppDrawerTextColorPreference(this);
+        }
         CharSequence label = info.title;
         if (label != null) {
             mLastOriginalText = label;

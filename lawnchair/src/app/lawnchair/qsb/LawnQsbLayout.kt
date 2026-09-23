@@ -93,7 +93,11 @@ class LawnQsbLayout(context: Context, attrs: AttributeSet?) : FrameLayout(contex
                         val style = buildQsbStyle(
                             context = LocalContext.current,
                             themed = themed,
-                            backgroundColor = getHotseatBackgroundColor(context, themed),
+                            backgroundColor = getHotseatBackgroundColor(
+                                context,
+                                themed,
+                                themedStrength = prefs2.hotseatQsbAccentStrength.asState().value,
+                            ),
                             backgroundAlpha = prefs.hotseatQsbAlpha.observeAsState().value,
                             cornerRadius = prefs.hotseatQsbCornerRadius.observeAsState().value,
                             // Use light color as strokeColor is a static color that doesn't use darkColor

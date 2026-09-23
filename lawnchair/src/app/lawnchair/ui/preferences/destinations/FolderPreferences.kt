@@ -101,7 +101,7 @@ fun FolderPreferences(
                 SliderPreference(
                     label = stringResource(id = R.string.label_size),
                     adapter = prefs2.homeIconLabelFolderSizeFactor.getAdapter(),
-                    step = 0.1f,
+                    step = 0.01f,
                     valueRange = 0.5F..1.5F,
                     showAsPercentage = true,
                 )

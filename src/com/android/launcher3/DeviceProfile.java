@@ -347,9 +347,15 @@ public class DeviceProfile {
     private final TextFactors mTextFactors;
     private float allAppsCellHeightMultiplier;
     private float workspacePaddingHorizontalFactor;
-    private float workspacePaddingVerticalFactor;
+    private float workspacePaddingTopFactor;
+    private float workspacePaddingBottomFactor;
+    // Lawnchair: the workspace side margin as it would be without the user's home screen
+    // padding factor, so the app drawer doesn't follow the home screen padding setting.
+    private int allAppsHorizontalMarginOriginalPx;
+    private int allAppsHorizontalMarginPx;
     private float widgetPaddingFactor;
     private float drawerPaddingTopFactor;
+    private float drawerPaddingBottomFactor;
     private PreferenceManager2 preferenceManager2 = null;
 
     /** TODO: Once we fully migrate to staged split, remove "isMultiWindowMode" */
@@ -369,12 +375,16 @@ public class DeviceProfile {
         // manually edited preference can't feed out-of-range values into the layout math.
         workspacePaddingHorizontalFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
                 .firstCached(preferenceManager2.getWorkspacePaddingHorizontalFactor()), 0f, 2f);
-        workspacePaddingVerticalFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
-                .firstCached(preferenceManager2.getWorkspacePaddingVerticalFactor()), 0f, 2f);
+        workspacePaddingTopFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getWorkspacePaddingTopFactor()), 0f, 2f);
+        workspacePaddingBottomFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getWorkspacePaddingBottomFactor()), 0f, 2f);
         widgetPaddingFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
                 .firstCached(preferenceManager2.getWidgetPaddingFactor()), 0f, 2f);
         drawerPaddingTopFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
                 .firstCached(preferenceManager2.getDrawerPaddingTopFactor()), 1f, 2f);
+        drawerPaddingBottomFactor = Utilities.boundToRange(PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getDrawerPaddingBottomFactor()), 1f, 2f);
         this.inv = inv;
 
         mDeviceProperties = DeviceProperties.Factory.createDeviceProperties(
@@ -667,6 +677,8 @@ public class DeviceProfile {
         }
 
         desiredWorkspaceHorizontalMarginPx = getHorizontalMarginPx(inv, res);
+        allAppsHorizontalMarginOriginalPx = desiredWorkspaceHorizontalMarginPx;
+        allAppsHorizontalMarginPx = allAppsHorizontalMarginOriginalPx;
         // Lawnchair: scale the horizontal workspace margin at the source so the cell layout
         // width calculation uses the scaled value too. Otherwise cells keep their original
         // width and get centered, leaving a visible side gap even at factor 0.
@@ -723,6 +735,9 @@ public class DeviceProfile {
         // Lawnchair: extra user-configurable app drawer top padding. The factor is additive
         // and slider-ranged 100%-200% (default 100%), so subtract 1f to keep 100% as no change.
         allAppsPadding.top += Math.round(iconSizePx * (drawerPaddingTopFactor - 1f));
+        // Lawnchair: same scheme for the bottom. This is applied on top of the nav bar inset
+        // by ActivityAllAppsContainerView, so it only holds the user-configured extra.
+        allAppsPadding.bottom = Math.round(iconSizePx * (drawerPaddingBottomFactor - 1f));
         allAppsOpenDuration = res.getInteger(R.integer.config_allAppsOpenDuration);
         allAppsCloseDuration = res.getInteger(R.integer.config_allAppsCloseDuration);
 
@@ -1330,6 +1345,7 @@ public class DeviceProfile {
             cellYPaddingPx = Math.max(0, cellHeightPx - cellContentHeight) / 2;
             desiredWorkspaceHorizontalMarginPx =
                     (int) (desiredWorkspaceHorizontalMarginOriginalPx * scale);
+            allAppsHorizontalMarginPx = (int) (allAppsHorizontalMarginOriginalPx * scale);
         } else {
             iconDrawablePaddingPx = (int) (getNormalizedIconDrawablePadding() * iconScale);
             cellWidthPx = iconSizePx + iconDrawablePaddingPx;
@@ -1442,7 +1458,7 @@ public class DeviceProfile {
             allAppsLeftRightMargin = Math.max(1, (mDeviceProperties.getAvailableWidthPx() - usedWidth) / 2);
         } else if (!mIsResponsiveGrid) {
             allAppsPadding.left = allAppsPadding.right =
-                    Math.max(0, desiredWorkspaceHorizontalMarginPx + cellLayoutHorizontalPadding
+                    Math.max(0, allAppsHorizontalMarginPx + cellLayoutHorizontalPadding
                             - (getAllAppsProfile().getBorderSpacePx().x / 2));
         }
         var allAppLeftRightMarginMultiplier = PreferenceCacheExtensionsKt
@@ -1778,14 +1794,14 @@ public class DeviceProfile {
                 paddingRight = isSeascape() ? 0 : desiredWorkspaceHorizontalMarginPx;
             }
 
-            // Lawnchair: scale vertical workspace padding by user factor.
+            // Lawnchair: scale the top and bottom workspace padding by their own user factors.
             // (Horizontal is applied at the source margin so the cells fill the freed space.)
             // The dock (hotseatBarSizePx) reservation in the bottom padding must be preserved,
             // otherwise reducing the factor pulls the last row into the dock and clips it.
-            paddingTop = Math.round(paddingTop * workspacePaddingVerticalFactor);
+            paddingTop = Math.max(0, paddingTop + Math.round(iconSizePx * (workspacePaddingTopFactor - 1f)));
             int bottomHotseatReserve = Math.min(hotseatBarSizePx, paddingBottom);
             paddingBottom = bottomHotseatReserve
-                    + Math.round((paddingBottom - bottomHotseatReserve) * workspacePaddingVerticalFactor);
+                    + Math.max(0, (paddingBottom - bottomHotseatReserve) + Math.round(iconSizePx * (workspacePaddingBottomFactor - 1f)));
 
             padding.set(paddingLeft, paddingTop, paddingRight, paddingBottom);
         }

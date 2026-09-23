@@ -16,32 +16,24 @@
 
 package app.lawnchair.ui.preferences.destinations
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.LauncherApps
 import android.os.Process
-import android.provider.Settings
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Science
-import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -61,15 +53,11 @@ import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.firstCached
 import app.lawnchair.preferences2.preferenceManager2
 import app.lawnchair.ui.OverflowMenuGrouped
-import app.lawnchair.ui.preferences.components.AnnouncementPreference
 import app.lawnchair.ui.preferences.components.controls.PreferenceCategory
-import app.lawnchair.ui.preferences.components.controls.WarningPreference
 import app.lawnchair.ui.preferences.components.layout.ClickableIcon
 import app.lawnchair.ui.preferences.components.layout.ExpandAndShrink
 import app.lawnchair.ui.preferences.components.layout.PreferenceGroup
 import app.lawnchair.ui.preferences.components.layout.PreferenceLayout
-import app.lawnchair.ui.preferences.components.layout.PreferenceTemplate
-import app.lawnchair.ui.preferences.components.layout.ProvideDescriptionTextStyle
 import app.lawnchair.ui.preferences.data.liveinfo.SyncLiveInformation
 import app.lawnchair.ui.preferences.navigation.About
 import app.lawnchair.ui.preferences.navigation.AppDrawer
@@ -86,12 +74,9 @@ import app.lawnchair.ui.preferences.navigation.Quickstep
 import app.lawnchair.ui.preferences.navigation.Search
 import app.lawnchair.ui.preferences.navigation.Smartspace
 import app.lawnchair.ui.util.addIf
-import app.lawnchair.util.isDefaultLauncher
 import app.lawnchair.util.restartLauncher
 import com.android.launcher3.BuildConfig
 import com.android.launcher3.R
-import com.android.launcher3.util.MSDLPlayerWrapper
-import com.google.android.msdl.data.model.MSDLToken
 
 @Composable
 fun PreferencesDashboard(
@@ -117,18 +102,6 @@ fun PreferencesDashboard(
         backArrowVisible = false,
         actions = { PreferencesOverflowMenu(currentRoute = currentRoute, onNavigate = onNavigate) },
     ) {
-        AnnouncementPreference()
-
-        if (BuildConfig.APPLICATION_ID.contains("nightly") || BuildConfig.DEBUG) {
-            PreferencesDebugWarning()
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        if (!context.isDefaultLauncher()) {
-            PreferencesSetDefaultLauncherWarning()
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
         val deckLayout = prefs2.deckLayout.getAdapter()
         PreferenceGroup {
             PreferenceCategory(
@@ -319,60 +292,6 @@ fun RowScope.PreferencesOverflowMenu(
         }
 
         Spacer(Modifier.height(MenuDefaults.GroupSpacing))
-    }
-}
-
-@Composable
-fun PreferencesDebugWarning(
-    modifier: Modifier = Modifier,
-) {
-    WarningPreference(
-        // Don't move to strings.xml, no need to translate this warning
-        text = "You are using a development build, which may contain bugs and broken features. Use at your own risk!",
-        modifier = modifier.padding(horizontal = 16.dp),
-        standalone = true,
-        colors = ListItemDefaults.segmentedColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer,
-        ),
-    )
-}
-
-@Composable
-fun PreferencesSetDefaultLauncherWarning(
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    val mMSDLPlayerWrapper = MSDLPlayerWrapper.INSTANCE.get(context)
-    Surface(
-        modifier = modifier.padding(horizontal = 16.dp),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        PreferenceTemplate(
-            modifier = Modifier,
-            onClick = {
-                mMSDLPlayerWrapper.playToken(MSDLToken.TAP_MEDIUM_EMPHASIS)
-                Intent(Settings.ACTION_HOME_SETTINGS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .let { context.startActivity(it) }
-                (context as? Activity)?.finish()
-            },
-            title = {
-                ProvideDescriptionTextStyle {
-                    Text(
-                        text = stringResource(id = R.string.set_default_launcher_tip),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            startWidget = {
-                Icon(
-                    imageVector = Icons.Rounded.TipsAndUpdates,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = null,
-                )
-            },
-        )
     }
 }
 

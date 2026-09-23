@@ -25,6 +25,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -141,6 +143,8 @@ private fun SliderPreference(
         onDispose { }
     }
 
+    val steps = getSteps(valueRange, step)
+
     PreferenceTemplate(
         title = {
             Row(
@@ -212,7 +216,16 @@ private fun SliderPreference(
                 },
                 onValueChangeFinished = { onValueChangeFinished(sliderValue) },
                 valueRange = valueRange,
-                steps = getSteps(valueRange, step),
+                steps = steps,
+                // Too many ticks just clutter the track, e.g. 1% steps on a size slider.
+                colors = if (steps > MAX_VISIBLE_TICKS) {
+                    SliderDefaults.colors(
+                        activeTickColor = Color.Transparent,
+                        inactiveTickColor = Color.Transparent,
+                    )
+                } else {
+                    SliderDefaults.colors()
+                },
                 modifier = Modifier
                     .padding(top = 2.dp, bottom = 8.dp)
                     .height(24.dp),
@@ -221,6 +234,8 @@ private fun SliderPreference(
         },
     )
 }
+
+private const val MAX_VISIBLE_TICKS = 20
 
 fun getSteps(valueRange: ClosedFloatingPointRange<Float>, step: Float): Int {
     if (step == 0f) return 0

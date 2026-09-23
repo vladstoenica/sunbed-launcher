@@ -58,6 +58,10 @@ fun DrawerSearchPreference(
                 context = context,
             )
             SwitchPreference(
+                label = stringResource(R.string.allapps_search_provider_logo_label),
+                adapter = prefs2.drawerSearchProviderLogo.getAdapter(),
+            )
+            SwitchPreference(
                 label = stringResource(R.string.allapps_match_qsb_style_label),
                 description = stringResource(R.string.allapps_match_qsb_style_description),
                 adapter = prefs2.matchHotseatQsbStyle.getAdapter(),

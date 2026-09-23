@@ -21,6 +21,7 @@ import static com.android.launcher3.icons.GraphicsUtils.setColorAlphaBound;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Spannable;
@@ -36,6 +37,9 @@ import androidx.annotation.RequiresApi;
 
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.R;
+import com.android.launcher3.icons.FastBitmapDrawable;
+
+import app.lawnchair.icons.ShadyShadows;
 
 /**
  * Extension of {@link BubbleTextView} which draws two shadows on the text (ambient and key shadows}
@@ -43,6 +47,8 @@ import com.android.launcher3.R;
 public class DoubleShadowBubbleTextView extends BubbleTextView {
 
     public final ShadowInfo mShadowInfo;
+    private final boolean mShadyShadows;
+    private final Rect mIconBounds = new Rect();
 
     public DoubleShadowBubbleTextView(Context context) {
         this(context, null);
@@ -54,7 +60,10 @@ public class DoubleShadowBubbleTextView extends BubbleTextView {
 
     public DoubleShadowBubbleTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mShadowInfo = ShadowInfo.Companion.fromContext(context, attrs, defStyle);
+        ShadowInfo shadowInfo = ShadowInfo.Companion.fromContext(context, attrs, defStyle);
+        // LC: Stronger label shadow and an icon shadow on the home screen and dock.
+        mShadyShadows = mDisplay == DISPLAY_WORKSPACE && ShadyShadows.isEnabled(context);
+        mShadowInfo = mShadyShadows ? ShadyShadows.labelShadowInfo(shadowInfo) : shadowInfo;
         setShadowLayer(
                 mShadowInfo.getAmbientShadowBlur(),
                 0,
@@ -106,6 +115,9 @@ public class DoubleShadowBubbleTextView extends BubbleTextView {
         if (shouldDrawAppContrastTile() && !TextUtils.isEmpty(getText())) {
             drawAppContrastTile(canvas);
         }
+        if (mShadyShadows) {
+            drawIconShadow(canvas);
+        }
         // If text is transparent or shadow alpha is 0, don't draw any shadow
         if (skipDoubleShadow()) {
             super.onDraw(canvas);
@@ -133,6 +145,15 @@ public class DoubleShadowBubbleTextView extends BubbleTextView {
 
         drawDotIfNecessary(canvas);
         drawRunningAppIndicatorIfNecessary(canvas);
+    }
+
+    private void drawIconShadow(Canvas canvas) {
+        FastBitmapDrawable icon = getIcon();
+        if (icon == null || !mIsIconVisible) {
+            return;
+        }
+        getIconBounds(mIconBounds);
+        ShadyShadows.draw(canvas, icon.bitmapInfo.icon, mIconBounds, icon.getAnimatedScale());
     }
 
     private boolean skipDoubleShadow() {

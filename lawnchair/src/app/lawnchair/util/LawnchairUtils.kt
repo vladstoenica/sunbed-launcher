@@ -51,6 +51,7 @@ import androidx.core.os.UserManagerCompat
 import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
+import app.lawnchair.theme.color.ColorMode
 import app.lawnchair.theme.color.ColorOption
 import app.lawnchair.theme.color.tokens.ColorTokens
 import com.android.launcher3.BaseActivity
@@ -148,7 +149,25 @@ fun supportsRoundedCornersOnWindows(context: Context): Boolean {
     }
 }
 
+/**
+ * Applies the user's explicit app drawer text color choice, if any.
+ *
+ * LIGHT means light (off-white) text and DARK means dark (grey) text, matching the home screen
+ * option. Returns false without touching the view when the choice is AUTO.
+ */
+fun applyAppDrawerTextColorPreference(textView: TextView): Boolean {
+    val context = textView.context
+    val colorRes = when (PreferenceManager2.getInstance(context).appDrawerTextColor.firstCached()) {
+        ColorMode.LIGHT -> R.color.app_drawer_text_off_white
+        ColorMode.DARK -> R.color.app_drawer_text_dark_grey
+        ColorMode.AUTO -> return false
+    }
+    textView.setTextColor(context.getColor(colorRes))
+    return true
+}
+
 fun overrideAllAppsTextColor(textView: TextView) {
+    if (applyAppDrawerTextColorPreference(textView)) return
     val context = textView.context
     val luminance = getAllAppsBaseColor(context, ColorTokens.AllAppsScrimColor.resolveColor(context)).luminance
     val opacity = PreferenceManager.getInstance(context).drawerOpacity.get()

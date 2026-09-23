@@ -45,6 +45,7 @@ import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
+import app.lawnchair.blur.DrawerBlur;
 import app.lawnchair.compat.LawnchairQuickstepCompat;
 import app.lawnchair.preferences2.PreferenceManager2;
 
@@ -59,6 +60,11 @@ public class DepthController extends BaseDepthController implements StateHandler
     private final Consumer<Boolean> mCrossWindowBlurListener = this::setCrossWindowBlursEnabled;
 
     private final Runnable mOpaquenessListener = this::applyDepthAndBlur;
+
+    private final Runnable mSamsungBlurListener = () -> {
+        mLauncher.updateBlurStyle();
+        applyDepthAndBlur();
+    };
 
     // Workaround for animating the depth when multiwindow mode changes.
     private boolean mIgnoreStateChangesDuringMultiWindowAnimation = false;
@@ -118,6 +124,7 @@ public class DepthController extends BaseDepthController implements StateHandler
                     }
                 }
                 mLauncher.getScrimView().addOpaquenessListener(mOpaquenessListener);
+                DrawerBlur.addSamsungStateListener(mSamsungBlurListener);
 
                 // To handle the case where window token is invalid during last setDepth call.
                 applyDepthAndBlur();
@@ -159,6 +166,7 @@ public class DepthController extends BaseDepthController implements StateHandler
         if (mOpaquenessListener != null) {
             mLauncher.getScrimView().removeOpaquenessListener(mOpaquenessListener);
         }
+        DrawerBlur.removeSamsungStateListener(mSamsungBlurListener);
     }
 
     /**

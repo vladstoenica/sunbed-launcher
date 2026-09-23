@@ -40,6 +40,7 @@ import app.lawnchair.ui.preferences.components.NavigationActionPreference
 import app.lawnchair.ui.preferences.components.OverlayHandlerPreference
 import app.lawnchair.ui.preferences.components.controls.ClickablePreference
 import app.lawnchair.ui.preferences.components.controls.ListPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.layout.ExpandAndShrink
@@ -165,8 +166,15 @@ fun HomeScreenPreferences(
                 showAsPercentage = true,
             )
             SliderPreference(
-                label = stringResource(id = R.string.vertical_padding_label),
-                adapter = prefs2.workspacePaddingVerticalFactor.getAdapter(),
+                label = stringResource(id = R.string.top_padding_label),
+                adapter = prefs2.workspacePaddingTopFactor.getAdapter(),
+                step = 0.05f,
+                valueRange = 0F..2F,
+                showAsPercentage = true,
+            )
+            SliderPreference(
+                label = stringResource(id = R.string.bottom_padding_label),
+                adapter = prefs2.workspacePaddingBottomFactor.getAdapter(),
                 step = 0.05f,
                 valueRange = 0F..2F,
                 showAsPercentage = true,
@@ -205,7 +213,7 @@ fun HomeScreenPreferences(
             SliderPreference(
                 label = stringResource(id = R.string.icon_sizes),
                 adapter = prefs2.homeIconSizeFactor.getAdapter(),
-                step = 0.1f,
+                step = 0.01f,
                 valueRange = 0.5F..1.5F,
                 showAsPercentage = true,
             )
@@ -217,11 +225,19 @@ fun HomeScreenPreferences(
                 SliderPreference(
                     label = stringResource(id = R.string.label_size),
                     adapter = prefs2.homeIconLabelSizeFactor.getAdapter(),
-                    step = 0.1f,
+                    step = 0.01f,
                     valueRange = 0.5F..1.5F,
                     showAsPercentage = true,
                 )
             }
+            ListPreference(
+                adapter = prefs2.homeShadyShadows.getAdapter(),
+                entries = listOf(
+                    ListPreferenceEntry(false) { stringResource(id = R.string.home_shadows_default) },
+                    ListPreferenceEntry(true) { stringResource(id = R.string.home_shadows_shady) },
+                ),
+                label = stringResource(id = R.string.home_shadows_label),
+            )
         }
         val overrideRepo = IconOverrideRepository.INSTANCE.get(LocalContext.current)
         val customIconsCount by remember { overrideRepo.observeCount() }.collectAsStateBlocking()

@@ -239,6 +239,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import app.lawnchair.LawnchairApp;
+import app.lawnchair.blur.DrawerBlur;
 import app.lawnchair.compat.LawnchairQuickstepCompat;
 
 public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
@@ -504,14 +505,14 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public boolean isAllAppsBackgroundBlurEnabled() {
-        return mDepthController != null && mDepthController.isCrossWindowBlursEnabled()
-                && Flags.allAppsBlur();
+        return mDepthController != null && Flags.allAppsBlur()
+                && DrawerBlur.isBlurEnabled(this, mDepthController.isCrossWindowBlursEnabled());
     }
 
     @Override
     public boolean isOverviewBackgroundBlurEnabled() {
         return mDepthController != null && mDepthController.isCrossWindowBlursEnabled()
-                && enableOverviewBackgroundWallpaperBlur();
+                && DrawerBlur.isUserEnabled(this) && enableOverviewBackgroundWallpaperBlur();
     }
 
     /** Apply the blur or blur fallback style to the current theme. */

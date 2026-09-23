@@ -49,6 +49,9 @@ import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.MultiPropertyFactory.MultiProperty;
 import com.android.systemui.shared.system.BlurUtils;
 
+import app.lawnchair.blur.DrawerBlur;
+import app.lawnchair.blur.SamsungBackdropBlurView;
+
 /**
  * Utility class for applying depth effect
  */
@@ -76,6 +79,9 @@ public class BaseDepthController {
 
     // b/291401432
     private static final String TAG = "BaseDepthController";
+
+    // LC: The app drawer blurs more strongly than other depth states.
+    private static final float ALL_APPS_BLUR_RADIUS_SCALE = 1.5f;
 
     protected final QuickstepLauncher mLauncher;
     /** Property to set the depth for state transition. */
@@ -120,6 +126,9 @@ public class BaseDepthController {
     protected boolean mWaitingOnSurfaceValidity;
 
     private SurfaceControl mBlurSurface = null;
+
+    @Nullable
+    private SamsungBackdropBlurView mSamsungBlurView;
     /**
      * Info for early wakeup requests to SurfaceFlinger.
      */
@@ -223,10 +232,18 @@ public class BaseDepthController {
             blurAmount = depth;
         }
 
+        boolean allAppsBlurState = isAllAppsBlurState();
+        int maxBlurRadius = allAppsBlurState
+                ? Math.round(mMaxBlurRadius * ALL_APPS_BLUR_RADIUS_SCALE) : mMaxBlurRadius;
+
         int previousBlur = mCurrentBlur;
         int newBlur = BlurUtils.supportsBlursOnWindows() && mCrossWindowBlursEnabled
+                && DrawerBlur.isUserEnabled(mLauncher)
                 && !hasOpaqueBg && !mPauseBlurs
-                ? (int) (blurAmount * mMaxBlurRadius) : 0;
+                ? (int) (blurAmount * maxBlurRadius) : 0;
+
+        // LC: One UI has no AOSP cross-window blur, so draw the All Apps blur with Samsung's API.
+        applySamsungBlur(blurAmount, hasOpaqueBg, allAppsBlurState, maxBlurRadius);
         int delta = Math.abs(newBlur - previousBlur);
         boolean skipUpdate = skipSimilarBlur && delta < Utilities.dpToPx(1) && newBlur != 0
                 && previousBlur != 0 && blurAmount != 1f;
@@ -331,6 +348,30 @@ public class BaseDepthController {
 //            transaction.setEarlyWakeupEnd();
         }
         mInEarlyWakeUp = start;
+    }
+
+    private void applySamsungBlur(float blurAmount, boolean hasOpaqueBg, boolean allAppsBlurState,
+            int maxBlurRadius) {
+        if (BlurUtils.supportsBlursOnWindows()) {
+            return;
+        }
+        if (mSamsungBlurView == null) {
+            mSamsungBlurView = mLauncher.findViewById(R.id.samsung_backdrop_blur);
+            if (mSamsungBlurView == null) {
+                return;
+            }
+        }
+        boolean enabled = !hasOpaqueBg && !mPauseBlurs && allAppsBlurState
+                && DrawerBlur.isSamsungBlurEnabled(mLauncher);
+        mSamsungBlurView.setBlurAmount(enabled ? blurAmount : 0f, maxBlurRadius);
+    }
+
+    /** Whether the current state or transition is into, out of, or within All Apps. */
+    private boolean isAllAppsBlurState() {
+        StateManager<LauncherState, Launcher> stateManager = mLauncher.getStateManager();
+        LauncherState targetState = stateManager.getTargetState() != null
+                ? stateManager.getTargetState() : stateManager.getState();
+        return stateManager.getCurrentStableState().shouldBlurWorkspace(targetState);
     }
 
     /** @return {@code true} if the workspace should be blurred. */
